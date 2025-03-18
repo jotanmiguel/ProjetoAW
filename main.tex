@@ -17,6 +17,7 @@
 \usepackage{float}     % Para controlar a posição das tabelas
 \usepackage{enumitem}  % Para listas personalizadas
 \usepackage{multirow}
+\usepackage{arydshln} % Coloca isso no preâmbulo
 
 
 % Title, author, and date
@@ -35,11 +36,12 @@
 \tableofcontents
 \newpage
 
+% Introduction section
 \section{Introduction}
 
-This document presents the architectural blueprint for a Spotify-inspired web application, designed to support a scalable, efficient, and modular system. The goal is to define a comprehensive architecture that encompasses both backend and frontend components, ensuring seamless interaction between services.
+This document presents the architectural blueprint for a Spotify-inspired web application, designed to support a scalable, efficient, and modular system. The goal is to define a comprehensive architecture that encompasses both the back-end and front-end components, ensuring seamless interaction between services.
 
-The blueprint will focus on designing a microservices-based backend, defining key resources, and establishing API communication. Additionally, it will outline the frontend architecture, including micro-frontends, state management, and routing. By leveraging an event-driven approach, the system will support real-time updates and scalable service orchestration.
+The blueprint will focus on designing a microservices-based backend, defining key resources, and establishing API communication. Additionally, it will outline the front-end architecture, including micro-front-ends, state management, and routing. Using an event-driven approach, the system will support real-time updates and scalable service orchestration.
 
 This document serves as a technical reference, detailing the structural design choices necessary to build the application, ensuring maintainability, performance, and adaptability to future enhancements.
 
@@ -65,10 +67,11 @@ This document serves as a technical reference, detailing the structural design c
 
 \clearpage % Forces the next content to start on a new page
 
+% BE Services section
 \section{BE Services}
 In this section, we define the back-end micro-services of this application.
 
-    % Auth Service
+% Auth Service
 \begin{table}[H]
     \centering
     \renewcommand\arraystretch{1.5}
@@ -82,9 +85,7 @@ In this section, we define the back-end micro-services of this application.
         \item \textbf{UserCredential}: Stores essential user login information like email and password hash.  
         \item \textbf{AuthToken}: Token issued upon successful login, used to authenticate user requests.  
         \item \textbf{RefreshToken}: Token that allows users to renew their `AuthToken` without re-authenticating.  
-        \item \textbf{VerificationToken}: Token used to verify user email addresses after registration.  
-        \item \textbf{AccountStatus}: Tracks the current state of a user account (e.g., active, suspended).  
-        \item \textbf{LoginAttempt}: Records each login attempt with timestamps and success status.  
+        \item \textbf{VerificationToken}: Token used to verify user email addresses after registration. 
         \item \textbf{Session}: Stores active session information, including start and last activity timestamps.
     \end{itemize} \\
     \hline
@@ -93,7 +94,7 @@ In this section, we define the back-end micro-services of this application.
     \label{tab:auth-service}
 \end{table}
 
-% Profile Service
+% User Service
 \begin{table}[H]
     \centering
     \renewcommand{\arraystretch}{1.5}
@@ -101,14 +102,17 @@ In this section, we define the back-end micro-services of this application.
     \hline
     \textbf{BE Service and Description} & \textbf{Resource Description} \\
     \hline
-    \textbf{Profile Service}: Manages user profiles, including personal information and user preferences. & 
+    \textbf{User Service}: Manages user profiles, including personal information, preferences, and account status. & 
     \begin{itemize}[left=0pt]
-        \item \textbf{Profile}: Contains user profile information like display name, profile picture, bio, and preferences.
-        \item \textbf{Preferences}: Stores user preferences such as favorite genres and language settings.
+        \item \textbf{User}: Contains users basic information like email and username.
+        \item \textbf{Profile}: Contains users public information.
+        \item \textbf{AccountStatus}: Indicates the current status of a user account.
+        \item \textbf{Activity}: Tracks the user's recent interactions, such as played media and followed artists, for history and personalization purposes.
     \end{itemize} \\
     \hline
     \end{tabular}
-    \caption{Profile Service Overview with Managed Resources}
+    \caption{User Service Overview with Managed Resources}
+    \label{tab:user-service}
 \end{table}
 
 % Media Service
@@ -121,53 +125,19 @@ In this section, we define the back-end micro-services of this application.
     \hline
     \textbf{Media Service}: Manages all media content, including tracks, albums, podcasts, episodes, and audiobooks. Also handles playback, downloads, and playlists. & 
     \begin{itemize}[left=0pt]
+        \item \textbf{Artist}: Represents music artists with attributes like artist\_id, name, bio, genre, image\_url.
         \item \textbf{Track}: Attributes include title, duration, artist ID, and audio URL.
         \item \textbf{Album}: Contains multiple tracks with attributes like title, release date, and artist ID.
         \item \textbf{Podcast}: Contains podcast metadata like title, description, host, and release date.
         \item \textbf{Episode}: Attributes include episode ID, title, duration, audio URL, and release date.
         \item \textbf{Playlist}: User-created playlists with title, description, and a list of tracks.
         \item \textbf{PlaybackSession}: Represents playback status with attributes like progress, status, and media ID.
-        \item \textbf{Download}: Records downloaded media linked to the user for offline access.
+        \item \textbf{Favorite}: Adds the media to the users library.
+        \item \textbf{Follow}: Manages relationships where users follow artists or podcasts.
     \end{itemize} \\
     \hline
     \end{tabular}
     \caption{Media Service Overview with Managed Resources}
-\end{table}
-
-% Interaction Service
-\begin{table}[H]
-    \centering
-    \renewcommand{\arraystretch}{1.5}
-    \begin{tabular}{|>{\centering\arraybackslash}m{4cm}|m{10cm}|}
-    \hline
-    \textbf{BE Service and Description} & \textbf{Resource Description} \\
-    \hline
-    \textbf{Interaction Service}: Manages user interactions with media, including favorites and shares. & 
-    \begin{itemize}[left=0pt]
-        \item \textbf{Favorite}: Stores favorite items associated with the user, including media type and ID.
-        \item \textbf{Share}: Manages shareable content, including URLs and embed codes.
-    \end{itemize} \\
-    \hline
-    \end{tabular}
-    \caption{Interaction Service Overview with Managed Resources}
-\end{table}
-
-% Friend Service
-\begin{table}[H]
-    \centering
-    \renewcommand{\arraystretch}{1.5}
-    \begin{tabular}{|>{\centering\arraybackslash}m{4cm}|m{10cm}|}
-    \hline
-    \textbf{BE Service and Description} & \textbf{Resource Description} \\
-    \hline
-    \textbf{Friend Service}: Manages friendships and social interactions between users. & 
-    \begin{itemize}[left=0pt]
-        \item \textbf{Friend}: Represents the friendship relationship between two users.
-        \item \textbf{FriendRequest}: Tracks pending friendship requests.
-    \end{itemize} \\
-    \hline
-    \end{tabular}
-    \caption{Friend Service Overview with Managed Resources}
 \end{table}
 
 % Search Service
@@ -181,132 +151,155 @@ In this section, we define the back-end micro-services of this application.
     \textbf{Search Service}: Provides search functionality across media, artists, and playlists. & 
     \begin{itemize}[left=0pt]
         \item \textbf{SearchQuery}: Captures user search input and filters.
-        \item \textbf{SearchResult}: Stores results matched to user queries.
     \end{itemize} \\
     \hline
     \end{tabular}
     \caption{Search Service Overview with Managed Resources}
 \end{table}
 
-\clearpage % Forces the next content to start on a new page
+% Notification Service
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.5}
+    \begin{tabular}{|>{\centering\arraybackslash}m{4cm}|m{10cm}|}
+    \hline
+    \textbf{BE Service and Description} & \textbf{Resource Description} \\
+    \hline
+    \textbf{Notification Service}: Manages notifications for new releases and updates related to followed media and artists. &
+    \begin{itemize}[left=0pt]
+        \item \textbf{Notification}: Represents a notification sent to the user, including content, type (new release, update), and timestamp.
+    \end{itemize} \\
+    \hline
+    \end{tabular}
+    \caption{Notification Service Overview with Managed Resources}
+\end{table}
 
+% Recommendation Service
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.5}
+    \begin{tabular}{|>{\centering\arraybackslash}m{4cm}|m{10cm}|}
+    \hline
+    \textbf{BE Service and Description} & \textbf{Resource Description} \\
+    \hline
+    \textbf{Recommendation Service}: Provides personalized recommendations for users based on their activity, listening habits, and trending content. &
+    \begin{itemize}[left=0pt]
+        \item \textbf{Recommendation}: Stores and manages recommended content for users, such as suggested tracks, albums, artists, and playlists.
+    \end{itemize} \\
+    \hline
+    \end{tabular}
+    \caption{Recommendation Service Overview with Managed Resources}
+\end{table}
+
+ \clearpage
+
+% Resources section
 \section{Resources}
-Each backend service manages a specific set of resources. 
+Each back-end service manages a specific set of resources. 
 
 % Auth Service
 \begin{table}[H]
     \centering
     \renewcommand{\arraystretch}{1.2}
     \setlength{\tabcolsep}{5pt}
-    \begin{tabular}{|>{\centering\arraybackslash}m{4cm}|m{3cm}|m{7cm}|}
+    \begin{tabular}{|>{\centering\arraybackslash}m{5.5cm}|m{2.5cm}|m{6.0cm}|}
     \hline
     \textbf{BE Services} & \textbf{Operations} & \textbf{Endpoints} \\
     \hline
-    \multirow{4}{*}{\textbf{Auth Service}} 
-    & POST & /auth/signup \\
-    & POST & /auth/login \\
-    & POST & /auth/refresh \\
-    & DELETE & /auth/logout \\
+    \multirow{7}{*}{\textbf{Auth Service}} 
+        & POST & /auth/login \\
+        & POST & /auth/refresh \\
+        & POST & /auth/verify \\
+        & DELETE & /auth/logout \\
+        \cdashline{2-3}
+        & GET & /auth/sessions \\
+        & GET & /auth/sessions/\{session\_id\} \\
+        & DELETE & /auth/sessions/\{session\_id\} \\
     \hline
     \end{tabular}
     \caption{Auth Service Operations and Endpoints}
 \end{table}
 
-% Profile Service
+% User Service
 \begin{table}[H]
     \centering
     \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|>{\centering\arraybackslash}m{4cm}|m{3cm}|m{7cm}|}
+    \begin{tabular}{|>{\centering\arraybackslash}m{5.5cm}|m{2.5cm}|m{6.0cm}|}
     \hline
     \textbf{BE Services} & \textbf{Operations} & \textbf{Endpoints} \\
     \hline
-    \multirow{4}{*}{\textbf{Profile Service}} 
-    & GET & /profiles \\
-    & GET & /profiles/{profile\_id} \\
-    & PUT & /profiles/{profile\_id} \\
-    & DELETE & /profiles/{profile\_id} \\
+    \multirow{10}{*}{\textbf{User Service}} 
+        & POST & /users \\ % criar conta
+        & PUT & /users/\{user\_id\} \\ % editar dados da conta
+        & DELETE & /users/\{user\_id\} \\ % Apagar conta
+        \cdashline{2-3}
+        & GET & /users/\{user\_id\}/profile \\ % obter o perfil publico
+        & PUT & /users/\{user\_id\}/profile \\ % atualizar o perfil publico
+        \cdashline{2-3}
+        & POST & /users/\{user\_id\}/following\\ % lista de utilizadores que segue
+        & POST & /users/\{user\_id\}/followers\\ % lista de utilizadores que o seguem
+        \cdashline{2-3}
+        & GET & /users/\{user\_id\}/status \\ % Verificar estado da conta
+        & PUT & /users/\{user\_id\}/status \\ % Verificar estado da conta
+        \cdashline{2-3}
+        & GET & /users/\{user\_id\}/activity \\
     \hline
     \end{tabular}
-    \caption{Profile Service Operations and Endpoints}
+    \caption{User Service Operations and Endpoints}
 \end{table}
 
-% Music Service
+% Media Service
 \begin{table}[H]
     \centering
     \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|>{\centering\arraybackslash}m{4cm}|m{3cm}|m{7cm}|}
+    \begin{tabular}{|>{\centering\arraybackslash}m{5.5cm}|m{2.5cm}|m{6.0cm}|}
     \hline
     \textbf{BE Services} & \textbf{Operations} & \textbf{Endpoints} \\
     \hline
-    \multirow{4}{*}{\textbf{Music Service}} 
-    & GET & /tracks \\
-    & GET & /tracks/{track\_id} \\
-    & POST & /tracks \\
-    & DELETE & /tracks/{track\_id} \\
+    \multirow{27}{*}{\textbf{Media Service}} 
+        & GET & /tracks \\
+        & GET & /tracks/{track\_id} \\
+        & POST & /tracks \\
+        & DELETE & /tracks/{track\_id} \\
+        \cdashline{2-3}
+        & GET & /albums/{album\_id} \\
+        & GET & /artists/{artist\_id} \\
+        & GET & /podcasts/{podcast\_id} \\
+        & GET & /episodes/{episode\_id} \\
+        \cdashline{2-3}
+        & GET & /playlists/{playlist\_id} \\
+        & POST & /playlists \\
+        & PUT & /playlists/{playlist\_id} \\
+        & DELETE & /playlists/{playlist\_id} \\
+        \cdashline{2-3}
+        & GET & /queue \\
+        & POST & /queue/{track\_id} \\
+        & DELETE & /queue/{track\_id} \\
+        \cdashline{2-3}
+        & GET & /playback \\
+        & PUT & /playback \\
+        & PUT & /playback/next \\ % Pula para a próxima música
+        & PUT & /playback/previous \\ % Volta para a música anterior
+        & PUT & /playback/shuffle \\
+        & PUT & /playback/repeat \\
+        \cdashline{2-3}
+        & GET & /favorites \\
+        & POST & /favorites/{media\_id} \\
+        & DELETE & /favorites/{media\_id} \\
+        \cdashline{2-3}
+        & GET & /follows \\
+        & POST & /follows/{artist\_id} \\
+        & DELETE & /follows/{artist\_id} \\
     \hline
     \end{tabular}
-    \caption{Music Service Operations and Endpoints}
-\end{table}
-
-% Artist Service
-\begin{table}[H]
-    \centering
-    \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|>{\centering\arraybackslash}m{4cm}|m{3cm}|m{7cm}|}
-    \hline
-    \textbf{BE Services} & \textbf{Operations} & \textbf{Endpoints} \\
-    \hline
-    \multirow{4}{*}{\textbf{Artist Service}} 
-    & GET & /artists \\
-    & GET & /artists/{artist\_id} \\
-    & POST & /artists \\
-    & DELETE & /artists/{artist\_id} \\
-    \hline
-    \end{tabular}
-    \caption{Artist Service Operations and Endpoints}
-\end{table}
-
-% Podcast Service
-\begin{table}[H]
-    \centering
-    \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|>{\centering\arraybackslash}m{4cm}|m{3cm}|m{7cm}|}
-    \hline
-    \textbf{BE Services} & \textbf{Operations} & \textbf{Endpoints} \\
-    \hline
-    \multirow{4}{*}{\textbf{Podcast Service}} 
-    & GET & /podcasts \\
-    & GET & /podcasts/{podcast\_id} \\
-    & POST & /podcasts \\
-    & DELETE & /podcasts/{podcast\_id} \\
-    \hline
-    \end{tabular}
-    \caption{Podcast Service Operations and Endpoints}
-\end{table}
-
-% Playlist Service
-\begin{table}[H]
-    \centering
-    \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|>{\centering\arraybackslash}m{4cm}|m{3cm}|m{7cm}|}
-    \hline
-    \textbf{BE Services} & \textbf{Operations} & \textbf{Endpoints} \\
-    \hline
-    \multirow{4}{*}{\textbf{Playlist Service}} 
-    & GET & /playlists \\
-    & GET & /playlists/{playlist\_id} \\
-    & POST & /playlists \\
-    & DELETE & /playlists/{playlist\_id} \\
-    \hline
-    \end{tabular}
-    \caption{Playlist Service Operations and Endpoints}
+    \caption{Media Service Operations and Endpoints}
 \end{table}
 
 % Search Service
 \begin{table}[H]
     \centering
     \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|>{\centering\arraybackslash}m{4cm}|m{3cm}|m{7cm}|}
+    \begin{tabular}{|>{\centering\arraybackslash}m{5.5cm}|m{2.5cm}|m{6.0cm}|}
     \hline
     \textbf{BE Services} & \textbf{Operations} & \textbf{Endpoints} \\
     \hline
@@ -320,6 +313,38 @@ Each backend service manages a specific set of resources.
     \caption{Search Service Operations and Endpoints}
 \end{table}
 
+% Notification Service
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{|>{\centering\arraybackslash}m{5.5cm}|m{2.5cm}|m{6.0cm}|}
+    \hline
+    \textbf{BE Services} & \textbf{Operations} & \textbf{Endpoints} \\
+    \hline
+    \multirow{1}{*}{\textbf{Notification Service}} 
+    & GET & /search?q=\{query\} \\
+    \hline
+    \end{tabular}
+    \caption{Notification Service Operations and Endpoints}
+\end{table}
+
+% Recommendation Service
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{|>{\centering\arraybackslash}m{5.5cm}|m{2.5cm}|m{6.0cm}|}
+    \hline
+    \textbf{BE Services} & \textbf{Operations} & \textbf{Endpoints} \\
+    \hline
+    \multirow{4}{*}{\textbf{Recommendation Service}} 
+    & GET & /search?q={query} \\
+    & GET & /search/artists?q={query} \\
+    & GET & /search/tracks?q={query} \\
+    & GET & /search/albums?q={query} \\
+    \hline
+    \end{tabular}
+    \caption{Recommendation Service Operations and Endpoints}
+\end{table}
 
 \clearpage % Forces the next content to start on a new page
 
