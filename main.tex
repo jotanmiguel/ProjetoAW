@@ -182,13 +182,13 @@ In this section, we define the back-end micro-services of this application.
     \hline
     \textbf{BE Service and Description} & \textbf{Resource Description} \\
     \hline
-    \textbf{Recommendation Service}: Provides personalized recommendations for users based on their activity, listening habits, and trending content. &
+    \textbf{Suggest Service}: Provides personalized suggestions for users based on their activity, listening habits, and trending content. &
     \begin{itemize}[left=0pt]
-        \item \textbf{Recommendation}: Stores and manages recommended content for users, such as suggested tracks, albums, artists, and playlists.
+        \item \textbf{Suggestion}: Stores and manages recommended content for users, such as suggested tracks, albums, artists, and playlists.
     \end{itemize} \\
     \hline
     \end{tabular}
-    \caption{Recommendation Service Overview with Managed Resources}
+    \caption{Suggest Service Overview with Managed Resources}
 \end{table}
 
  \clearpage
@@ -197,7 +197,7 @@ In this section, we define the back-end micro-services of this application.
 \section{Resources}
 Each back-end service manages a specific set of resources. 
 
-% Auth Service
+% Auth Resources
 \begin{table}[H]
     \centering
     \renewcommand{\arraystretch}{1.2}
@@ -211,7 +211,7 @@ Each back-end service manages a specific set of resources.
         & POST & /auth/refresh \\
         & POST & /auth/verify \\
         & DELETE & /auth/logout \\
-        \cdashline{2-3}
+        \cdashline{2-3}        
         & GET & /auth/sessions \\
         & GET & /auth/sessions/\{session\_id\} \\
         & DELETE & /auth/sessions/\{session\_id\} \\
@@ -220,7 +220,7 @@ Each back-end service manages a specific set of resources.
     \caption{Auth Service Operations and Endpoints}
 \end{table}
 
-% User Service
+% User Resources
 \begin{table}[H]
     \centering
     \renewcommand{\arraystretch}{1.2}
@@ -228,122 +228,226 @@ Each back-end service manages a specific set of resources.
     \hline
     \textbf{BE Services} & \textbf{Operations} & \textbf{Endpoints} \\
     \hline
-    \multirow{10}{*}{\textbf{User Service}} 
-        & POST & /users \\ % criar conta
-        & PUT & /users/\{user\_id\} \\ % editar dados da conta
-        & DELETE & /users/\{user\_id\} \\ % Apagar conta
+    \multirow{12}{*}{\textbf{User Service}} 
+        & POST & /users \\ % Create user account 
+        & PUT & /users/\{user\_id\} \\ % Edit user data
+        & DELETE & /users/\{user\_id\} \\ % Delete users account
         \cdashline{2-3}
-        & GET & /users/\{user\_id\}/profile \\ % obter o perfil publico
-        & PUT & /users/\{user\_id\}/profile \\ % atualizar o perfil publico
+        & GET & /users/me \\ % Get private data of the authenticated user
         \cdashline{2-3}
-        & POST & /users/\{user\_id\}/following\\ % lista de utilizadores que segue
-        & POST & /users/\{user\_id\}/followers\\ % lista de utilizadores que o seguem
+        & GET & /users/\{user\_id\}/profile \\ % Get user's public profile
+        & PUT & /users/\{user\_id\}/profile \\ % Update user's public profile
         \cdashline{2-3}
-        & GET & /users/\{user\_id\}/status \\ % Verificar estado da conta
-        & PUT & /users/\{user\_id\}/status \\ % Verificar estado da conta
+        & GET & /users/me/following \\ % List of users/artists/podcasts followed by authenticated user
+        & GET & /users/\{user\_id\}/following \\ % List of users the user follows
+        & GET & /users/\{user\_id\}/followers \\ % List of users that follow the user
+        & PUT & /users/me/following \\ % Update the list of followed users
         \cdashline{2-3}
-        & GET & /users/\{user\_id\}/activity \\
+        & GET & /users/\{user\_id\}/status \\ % Get account status
+        & PUT & /users/\{user\_id\}/status \\ % Update account status
+        \cdashline{2-3}
+        & GET & /users/\{user\_id\}/activity \\ % Get user activity history
     \hline
     \end{tabular}
     \caption{User Service Operations and Endpoints}
 \end{table}
 
-% Media Service
+% Media Resources (Tracks & Albums)
 \begin{table}[H]
     \centering
     \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|>{\centering\arraybackslash}m{5.5cm}|m{2.5cm}|m{6.0cm}|}
+    \begin{tabular}{|>{\centering\arraybackslash}m{4.0cm}|m{2.5cm}|m{7.5cm}|}
     \hline
     \textbf{BE Services} & \textbf{Operations} & \textbf{Endpoints} \\
     \hline
-    \multirow{27}{*}{\textbf{Media Service}} 
-        & GET & /tracks \\
-        & GET & /tracks/{track\_id} \\
+    \multirow{12}{*}{\makecell{\textbf{Media Service} \\ Tracks \& Albums}}
         & POST & /tracks \\
-        & DELETE & /tracks/{track\_id} \\
+        & GET & /tracks \\
+        & GET & /tracks/\{track\_id\} \\
+        & PUT & /tracks/\{track\_id\} \\ % Atualizar track
+        & DELETE & /tracks/\{track\_id\} \\
         \cdashline{2-3}
-        & GET & /albums/{album\_id} \\
-        & GET & /artists/{artist\_id} \\
-        & GET & /podcasts/{podcast\_id} \\
-        & GET & /episodes/{episode\_id} \\
+        & POST & /albums \\ % Criar álbum
+        & GET & /albums/\{album\_id\} \\
+        & PUT & /albums/\{album\_id\} \\ % Atualizar álbum
+        & DELETE & /albums/\{album\_id\} \\ % Apagar álbum
         \cdashline{2-3}
-        & GET & /playlists/{playlist\_id} \\
+        & POST   & /albums/\{album\_id\}/tracks \\ % Adicionar música ao álbum
+        & GET    & /albums/\{album\_id\}/tracks \\ % Listar músicas do álbum
+        & DELETE & /albums/\{album\_id\}/tracks/\{track\_id\} \\ % Remover música do álbum
+    \hline
+    \end{tabular}
+    \caption{Media Service - Tracks \& Albums}
+\end{table}
+
+% Media Resources (Artists & Podcasts)
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{|>{\centering\arraybackslash}m{4.0cm}|m{2.5cm}|m{7.5cm}|}
+    \hline
+    \textbf{BE Services} & \textbf{Operations} & \textbf{Endpoints} \\
+    \hline
+    \multirow{9}{*}{\makecell{\textbf{Media Service} \\ Artists \& Podcasts}} 
+        & POST & /artists \\
+        & GET & /artists \\
+        & GET & /artists/\{artist\_id\} \\
+        & PUT & /artists/\{artist\_id\} \\ % Atualizar perfil do artista
+        & GET    & /artists/\{artist\_id\}/tracks \\ % Listar músicas do artista
+        & POST   & /artists/\{artist\_id\}/tracks \\ % Adicionar música ao artista (opcional)
+        & DELETE & /artists/\{artist\_id\}/tracks/\{track\_id\} \\ % Remover música do artista
+        \cdashline{2-3}
+        & POST & /podcasts \\ % Criar podcast
+        & GET & /podcasts \\ % ver podcasts
+        & GET & /podcasts/\{podcast\_id\} \\
+        & PUT & /podcasts/\{podcast\_id\} \\ % Atualizar podcast
+        & DELETE & /podcasts/\{podcast\_id\} \\ % Apagar podcast
+        \cdashline{2-3}        
+        & GET & /podcasts/\{podcast\_id\}/episodes \\
+        & PUT & /podcasts/\{podcast\_id\}/episodes \\ % Atualizar podcast
+    \hline
+    \end{tabular}
+    \caption{Media Service - Artists \& Podcasts}
+\end{table}
+
+% Media Resources (Episodes & Playlists)
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{|>{\centering\arraybackslash}m{4.0cm}|m{2.5cm}|m{7.5cm}|}
+    \hline
+    \textbf{BE Services} & \textbf{Operations} & \textbf{Endpoints} \\
+    \hline
+    \multirow{13}{*}{\makecell{\textbf{Media Service} \\ Episodes \& Playlists}} 
+        & POST & /episodes \\ % Criar episódio
+        & GET & /episodes/\{episode\_id\} \\
+        & PUT & /episodes/\{episode\_id\} \\ % Atualizar episódio
+        & DELETE & /episodes/\{episode\_id\} \\ % Apagar episódio
+        \cdashline{2-3}
         & POST & /playlists \\
-        & PUT & /playlists/{playlist\_id} \\
-        & DELETE & /playlists/{playlist\_id} \\
+        & GET & /playlists \\
+        & GET & /playlists/\{playlist\_id\} \\
+        & PUT & /playlists/\{playlist\_id\} \\ % Atualizar nome/descrição da playlist
+        & DELETE & /playlists/\{playlist\_id\} \\
         \cdashline{2-3}
-        & GET & /queue \\
-        & POST & /queue/{track\_id} \\
-        & DELETE & /queue/{track\_id} \\
-        \cdashline{2-3}
+        & POST & /playlists/\{playlist\_id\}/tracks \\ % addd track to playlist
+        & GET & /playlists/\{playlist\_id\}/tracks \\ % addd track to playlist
+        & PUT & /playlists/\{playlist\_id\}/tracks \\ % Atualizar a ordem das faixas
+        & DELETE & /playlists/\{playlist\_id\}/tracks/\{track\_id\} \\ % addd track to playlist
+    \hline
+    \end{tabular}
+    \caption{Media Service - Episodes \& Playlists}
+\end{table}
+
+% Media Resources (Playback & Queue)
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{|>{\centering\arraybackslash}m{4.0cm}|m{2.5cm}|m{7.5cm}|}
+    \hline
+    \textbf{BE Services} & \textbf{Operations} & \textbf{Endpoints} \\
+    \hline
+    \multirow{11}{*}{\makecell{\textbf{Media Service} \\ Playback \& Queue}} 
         & GET & /playback \\
-        & PUT & /playback \\
-        & PUT & /playback/next \\ % Pula para a próxima música
-        & PUT & /playback/previous \\ % Volta para a música anterior
+        & POST & /playback/resume \\ % Pular para a próxima música
+        & POST & /playback/stop \\ % Voltar para a música anterior
+        & POST & /playback/play/\{media\_id\} \\ % Pular para a próxima música
+        & POST & /playback/previous \\ % Voltar para a música anterior
+        & POST & /playback/next \\ % Pular para a próxima música
+        & POST & /playback/previous \\ % Voltar para a música anterior
         & PUT & /playback/shuffle \\
         & PUT & /playback/repeat \\
         \cdashline{2-3}
-        & GET & /favorites \\
-        & POST & /favorites/{media\_id} \\
-        & DELETE & /favorites/{media\_id} \\
-        \cdashline{2-3}
-        & GET & /follows \\
-        & POST & /follows/{artist\_id} \\
-        & DELETE & /follows/{artist\_id} \\
+        & GET & /queue \\
+        & DELETE & /queue \\ % Remover da fila
+        & PUT & /queue/order \\
+        & POST & /queue/tracks/\{track\_id\} \\ % Adicionar à fila
+        & DELETE & /queue/tracks/\{track\_id\} \\ % Remover da fila
     \hline
     \end{tabular}
-    \caption{Media Service Operations and Endpoints}
+    \caption{Media Service - Playback \& Queue}
 \end{table}
 
-% Search Service
+% Media Resources (Favorites & Follows)
 \begin{table}[H]
     \centering
     \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|>{\centering\arraybackslash}m{5.5cm}|m{2.5cm}|m{6.0cm}|}
+    \begin{tabular}{|>{\centering\arraybackslash}m{4.0cm}|m{2.5cm}|m{7.5cm}|}
     \hline
     \textbf{BE Services} & \textbf{Operations} & \textbf{Endpoints} \\
     \hline
-    \multirow{4}{*}{\textbf{Search Service}} 
-    & GET & /search?q={query} \\
-    & GET & /search/artists?q={query} \\
-    & GET & /search/tracks?q={query} \\
-    & GET & /search/albums?q={query} \\
+    \multirow{10}{*}{\makecell{\textbf{Media Service} \\ Favorites \& Follows}} 
+        & GET & /favorites \\
+        & POST & /favorites/\{media\_id\} \\ % Adicionar aos favoritos
+        & DELETE & /favorites/\{media\_id\} \\ % Remover dos favoritos
+        \cdashline{2-3}
+        & GET & /follows \\
+        & GET & /follows/artists \\
+        & POST & /follows/artists/\{artist\_id\} \\ % Seguir artista
+        & DELETE & /follows/artists/\{artist\_id\} \\ % Deixar de seguir artista
+        & GET & /follows/podcasts \\
+        & POST & /follows/podcasts/\{podcast\_id\} \\ % Seguir artista
+        & DELETE & /follows/podcasts/\{podcast\_id\} \\ % Deixar de seguir artista
+    \hline
+    \end{tabular}
+    \caption{Media Service - Favorites \& Follows}
+\end{table}
+
+
+% Search Resources
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{|>{\centering\arraybackslash}m{4.0cm}|m{2.5cm}|m{7.5cm}|}
+    \hline
+    \textbf{BE Services} & \textbf{Operations} & \textbf{Endpoints} \\
+    \hline
+    \multirow{5}{*}{\textbf{Search Service}} 
+        & GET & /search?q=\{query\}\&type=\{type\} \\
+        & GET & /search/tracks?q=\{query\} \\
+        & GET & /search/albums?q=\{query\} \\
+        & GET & /search/artists?q=\{query\} \\
+        & GET & /search/playlists?q=\{query\} \\
     \hline
     \end{tabular}
     \caption{Search Service Operations and Endpoints}
 \end{table}
 
-% Notification Service
+% Notification Resources
 \begin{table}[H]
     \centering
     \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|>{\centering\arraybackslash}m{5.5cm}|m{2.5cm}|m{6.0cm}|}
+    \begin{tabular}{|>{\centering\arraybackslash}m{4.0cm}|m{2.5cm}|m{7.5cm}|}
     \hline
     \textbf{BE Services} & \textbf{Operations} & \textbf{Endpoints} \\
     \hline
     \multirow{1}{*}{\textbf{Notification Service}} 
-    & GET & /search?q=\{query\} \\
+    & GET & /notifications \\
     \hline
     \end{tabular}
     \caption{Notification Service Operations and Endpoints}
 \end{table}
 
-% Recommendation Service
+% Suggest Resources
 \begin{table}[H]
     \centering
     \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|>{\centering\arraybackslash}m{5.5cm}|m{2.5cm}|m{6.0cm}|}
+    \setlength{\tabcolsep}{5pt}
+    \begin{tabular}{|>{\centering\arraybackslash}m{4.0cm}|m{2.5cm}|m{7.5cm}|}
     \hline
     \textbf{BE Services} & \textbf{Operations} & \textbf{Endpoints} \\
     \hline
-    \multirow{4}{*}{\textbf{Recommendation Service}} 
-    & GET & /search?q={query} \\
-    & GET & /search/artists?q={query} \\
-    & GET & /search/tracks?q={query} \\
-    & GET & /search/albums?q={query} \\
+    \multirow{7}{*}{\textbf{Suggest Service}} 
+    & GET & /suggestions \\
+    & GET & /suggestions/new-releases \\
+    & GET & /suggestions/made-for-you \\
+    & GET & /suggestions/for-followers \\
+    & GET & /suggestions/popular \\
+    & GET & /suggestions/mood-based \\
+    & GET & /suggestions/similar-to/\{track\_id\} \\
     \hline
     \end{tabular}
-    \caption{Recommendation Service Operations and Endpoints}
+    \caption{Suggest Service Operations and Endpoints}
 \end{table}
 
 \clearpage % Forces the next content to start on a new page
